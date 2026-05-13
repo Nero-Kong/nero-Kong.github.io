@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Project One — Nero Kong</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #f4f5f7;
+  --ink: #0f1419;
+  --ink-2: #4a5568;
+  --ink-3: #94a3b8;
+  --rule: rgba(15, 20, 25, 0.08);
+  --rule-2: rgba(15, 20, 25, 0.14);
+  --accent: #2c5282;
+  --accent-soft: rgba(44, 82, 130, 0.08);
+
+  --glass: rgba(255, 255, 255, 0.55);
+  --glass-strong: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-highlight: rgba(255, 255, 255, 0.6);
+
+  --shadow: 0 1px 2px rgba(15,20,25,0.03), 0 6px 20px rgba(15,20,25,0.06);
+  --shadow-lg: 0 6px 20px rgba(15,20,25,0.06), 0 28px 70px -10px rgba(15,20,25,0.2);
+
+  --sans: "Manrope", -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+[data-theme="dark"] {
+  --bg: #0a0e14;
+  --ink: #f0f2f5;
+  --ink-2: #94a3b8;
+  --ink-3: #64748b;
+  --rule: rgba(255, 255, 255, 0.07);
+  --rule-2: rgba(255, 255, 255, 0.14);
+  --accent: #4a7fbf;
+  --accent-soft: rgba(74, 127, 191, 0.18);
+
+  --glass: rgba(255, 255, 255, 0.04);
+  --glass-strong: rgba(15, 20, 25, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.06);
+
+  --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.5), 0 28px 70px -8px rgba(0,0,0,0.6);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(at 12% 18%, rgba(70, 110, 170, 0.14), transparent 50%),
+    radial-gradient(at 88% 22%, rgba(130, 160, 200, 0.10), transparent 50%),
+    radial-gradient(at 55% 95%, rgba(180, 200, 220, 0.16), transparent 55%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.55;
+  letter-spacing: -0.008em;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s, color 0.3s;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+[data-theme="dark"] body {
+  background-image:
+    radial-gradient(at 12% 18%, rgba(60, 100, 160, 0.22), transparent 50%),
+    radial-gradient(at 88% 22%, rgba(100, 130, 180, 0.13), transparent 50%),
+    radial-gradient(at 55% 95%, rgba(80, 120, 170, 0.18), transparent 55%);
+}
+
+::selection { background: var(--accent); color: white; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; background: none; border: none; color: inherit; cursor: pointer; }
+
+/* Nav */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: var(--glass);
+  backdrop-filter: blur(28px) saturate(140%);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
+  border-bottom: 1px solid transparent;
+  transition: background 0.3s, border-color 0.3s;
+}
+.nav.scrolled { border-bottom-color: var(--rule); }
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  padding: 4px 10px 4px 6px;
+  margin: -4px -6px -4px -10px;
+  border-radius: 7px;
+  transition: background 0.2s;
+}
+.back-link:hover { background: var(--glass-strong); }
+.back-link svg { width: 14px; height: 14px; transition: transform 0.4s var(--ease); color: var(--ink-2); }
+.back-link:hover svg { transform: translateX(-3px); color: var(--accent); }
+
+.nav-right { display: flex; align-items: center; gap: 8px; }
+
+.icon-btn {
+  width: 32px; height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  color: var(--ink-2);
+  transition: background 0.2s, color 0.2s;
+}
+.icon-btn:hover { background: var(--glass-strong); color: var(--ink); }
+.icon-btn svg { width: 15px; height: 15px; }
+
+/* Main */
+.main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 110px 24px 60px;
+}
+
+/* Project header */
+.project-header { margin-bottom: 36px; }
+
+.project-meta-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 20px;
+}
+.project-meta-top .dot {
+  width: 3px; height: 3px;
+  background: var(--ink-3);
+  border-radius: 50%;
+}
+
+.project-title-big {
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 700;
+  letter-spacing: -0.036em;
+  line-height: 1.02;
+  margin-bottom: 16px;
+}
+
+.project-lead {
+  font-size: 18px;
+  color: var(--ink-2);
+  line-height: 1.5;
+  max-width: 58ch;
+  margin-bottom: 32px;
+  font-weight: 400;
+}
+
+.project-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: linear-gradient(180deg, #1a1d23, #0f1419);
+  color: white;
+  border-radius: 9px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    inset 0 -1px 0 rgba(0,0,0,0.4),
+    0 1px 0 rgba(255,255,255,0.6),
+    0 8px 20px rgba(15,20,25,0.22);
+  transition: transform 0.2s;
+}
+[data-theme="dark"] .btn-primary {
+  background: linear-gradient(180deg, #f5f5f5, #d8d8d8);
+  color: var(--ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    inset 0 -1px 0 rgba(0,0,0,0.08),
+    0 8px 20px rgba(0,0,0,0.4);
+}
+.btn-primary:hover { transform: translateY(-1px); }
+.btn-primary .arrow {
+  display: inline-block;
+  transition: transform 0.4s var(--ease);
+}
+.btn-primary:hover .arrow { transform: translateX(2px); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  color: var(--ink-2);
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: 9px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+  transition: background 0.2s, color 0.2s;
+}
+.btn-ghost:hover { background: var(--glass-strong); color: var(--ink); }
+.btn-ghost svg { width: 14px; height: 14px; }
+
+/* Project cover */
+.project-cover {
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, #3b556d, #1e293b);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 56px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.15),
+    var(--shadow-lg);
+}
+.project-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(at 25% 25%, rgba(255,255,255,0.15), transparent 50%),
+    radial-gradient(at 75% 80%, rgba(0,0,0,0.2), transparent 60%);
+}
+.cover-glyph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 112px;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 300;
+  z-index: 1;
+}
+
+/* Sections */
+.project-section { margin-bottom: 48px; }
+
+.project-section h2 {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.project-section p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--ink);
+  margin-bottom: 14px;
+  max-width: 64ch;
+}
+.project-section p:last-child { margin-bottom: 0; }
+.project-section em { font-style: italic; color: var(--ink); }
+.project-section strong { font-weight: 600; }
+.project-section a {
+  color: var(--accent);
+  border-bottom: 1px solid var(--accent-soft);
+  transition: border-color 0.2s;
+}
+.project-section a:hover { border-bottom-color: var(--accent); }
+
+/* Pull quote */
+.pull-quote {
+  margin: 32px 0;
+  padding: 24px 28px;
+  background: var(--glass);
+  backdrop-filter: blur(28px) saturate(140%);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--shadow);
+  font-size: 17px;
+  font-style: italic;
+  color: var(--ink);
+  line-height: 1.55;
+  position: relative;
+}
+.pull-quote::before {
+  content: '"';
+  position: absolute;
+  top: 4px; left: 12px;
+  font-size: 48px;
+  color: var(--ink-3);
+  opacity: 0.4;
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+.pull-quote .cite {
+  display: block;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-3);
+  margin-top: 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: var(--mono);
+}
+
+/* Tech stack */
+.tech-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tech-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  background: var(--glass);
+  backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-2);
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+}
+
+/* Link list */
+.link-list {
+  list-style: none;
+  margin-top: 16px;
+}
+.link-list li { border-top: 1px solid var(--rule); }
+.link-list li:last-child { border-bottom: 1px solid var(--rule); }
+.link-list a {
+  display: grid;
+  grid-template-columns: 100px 1fr 24px;
+  gap: 16px;
+  padding: 14px 0;
+  align-items: baseline;
+  transition: padding 0.4s var(--ease);
+}
+.link-list a:hover { padding-left: 12px; padding-right: 12px; }
+.link-list .label {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.link-list .value {
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+}
+.link-list .arr {
+  color: var(--ink-3);
+  font-size: 13px;
+  text-align: right;
+  transition: color 0.2s, transform 0.4s var(--ease);
+}
+.link-list a:hover .arr { color: var(--accent); transform: translateX(3px); }
+
+/* Bottom nav */
+.project-bottom-nav {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.project-bottom-nav a {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  letter-spacing: -0.012em;
+  transition: color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.project-bottom-nav a:hover { color: var(--accent); }
+.project-bottom-nav .next-label {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  display: block;
+  margin-bottom: 2px;
+}
+.project-bottom-nav .next-title {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  color: var(--ink);
+}
+.project-bottom-nav .next { text-align: right; }
+
+/* Footer */
+.footer {
+  margin-top: 56px;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+}
+
+/* Tablet & smaller */
+@media (max-width: 720px) {
+  .main { padding: 96px 20px 56px; }
+  .nav { padding: 12px 18px; }
+  .back-link { font-size: 13px; }
+
+  .project-meta-top { font-size: 10px; gap: 6px; margin-bottom: 16px; }
+  .project-title-big { font-size: 32px; }
+  .project-lead { font-size: 16px; line-height: 1.55; margin-bottom: 28px; }
+
+  /* Buttons - bigger touch target */
+  .project-actions { gap: 8px; }
+  .btn-primary, .btn-ghost { font-size: 13px; padding: 12px 18px; }
+
+  .project-cover { aspect-ratio: 16/10; border-radius: 14px; margin-bottom: 40px; }
+  .cover-glyph { font-size: 72px; }
+
+  .project-section { margin-bottom: 36px; }
+  .project-section p { font-size: 15.5px; line-height: 1.65; }
+
+  .pull-quote { padding: 20px 22px; font-size: 16px; margin: 24px 0; }
+
+  .link-list a {
+    grid-template-columns: 80px 1fr 20px;
+    gap: 12px;
+    padding: 14px 0;
+  }
+  .link-list .value { font-size: 14px; }
+
+  .footer { flex-direction: column; gap: 8px; align-items: flex-start; }
+  .project-bottom-nav { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .project-bottom-nav .next { text-align: left; }
+}
+
+/* Small phone */
+@media (max-width: 480px) {
+  .main { padding: 84px 16px 48px; }
+  .nav { padding: 10px 16px; }
+  .project-title-big { font-size: 28px; }
+  .project-lead { font-size: 15px; }
+  .cover-glyph { font-size: 56px; }
+  .project-cover { border-radius: 12px; margin-bottom: 32px; }
+  .project-section p { font-size: 15px; }
+  .pull-quote { padding: 18px 20px; font-size: 15px; }
+
+  /* 小屏按钮全宽 */
+  .project-actions { flex-direction: column; align-items: stretch; }
+  .btn-primary, .btn-ghost { justify-content: center; }
+
+  .link-list a { grid-template-columns: 72px 1fr; gap: 10px; }
+  .link-list .arr { display: none; }
+  .link-list .value { font-size: 13.5px; }
+  .link-list .label { font-size: 10px; }
+}
+
+/* iOS Safari 100vh fix */
+@supports (-webkit-touch-callout: none) {
+  body { min-height: -webkit-fill-available; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <a href="index.html" class="back-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+    All projects
+  </a>
+  <div class="nav-right">
+    <button class="icon-btn" id="theme-btn" title="Toggle theme">
+      <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<main class="main">
+
+  <header class="project-header">
+    <div class="project-meta-top">
+      <span>2026</span>
+      <span class="dot"></span>
+      <span>Software</span>
+      <span class="dot"></span>
+      <span>Tokyo, Japan</span>
+    </div>
+    <h1 class="project-title-big">Project One</h1>
+    <p class="project-lead">
+      A small but carefully built tool for distributed model serving. Used by several teams in production. This page documents what it is, why it exists, and how it works.
+    </p>
+    <div class="project-actions">
+      <a href="#" class="btn-primary">
+        Visit live <span class="arrow">↗</span>
+      </a>
+      <a href="#" class="btn-ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        View on GitHub
+      </a>
+    </div>
+  </header>
+
+  <div class="project-cover">
+    <span class="cover-glyph">⌘</span>
+  </div>
+
+  <section class="project-section">
+    <h2>— Overview</h2>
+    <p>
+      This project began as a quiet experiment to understand why our distributed inference setup was so brittle under realistic load. What started as a debugging tool turned into a full reimplementation of the serving layer, now adopted across several teams and handling production traffic at scale.
+    </p>
+    <p>
+      The core idea is simple: instead of treating each request as independent, we batch by structural similarity and route through a learned scheduling layer. The result is roughly <strong>3.4× throughput improvement</strong> on long-context workloads with no quality regression.
+    </p>
+  </section>
+
+  <div class="pull-quote">
+    The interesting bottleneck is rarely where you expect it. Most of our latency turned out to live in scheduling, not compute.
+    <span class="cite">— from the design doc</span>
+  </div>
+
+  <section class="project-section">
+    <h2>— Architecture</h2>
+    <p>
+      The system has three pieces. A <em>request shaper</em> that normalizes incoming requests into a canonical form. A <em>scheduler</em> that batches by predicted compute cost. And a <em>worker pool</em> that runs the actual model with adaptive memory allocation.
+    </p>
+    <p>
+      The scheduler is the most interesting piece. It uses a small learned model trained on production traces to predict per-request cost before the request is dispatched. This lets us pack batches more aggressively without risking out-of-memory failures.
+    </p>
+    <p>
+      A full architecture write-up is available in the <a href="#">technical report</a>.
+    </p>
+  </section>
+
+  <section class="project-section">
+    <h2>— Outcomes</h2>
+    <p>
+      Deployed to production in March 2026. Currently handling the majority of long-context inference traffic at our company. Adopted by three additional teams. Open-sourced as a reference implementation in October 2026.
+    </p>
+  </section>
+
+  <section class="project-section">
+    <h2>— Stack</h2>
+    <div class="tech-list">
+      <span class="tech-tag">Python</span>
+      <span class="tech-tag">PyTorch</span>
+      <span class="tech-tag">Rust</span>
+      <span class="tech-tag">gRPC</span>
+      <span class="tech-tag">Kubernetes</span>
+      <span class="tech-tag">Prometheus</span>
+    </div>
+  </section>
+
+  <section class="project-section">
+    <h2>— Links</h2>
+    <ul class="link-list">
+      <li><a href="#"><span class="label">Live demo</span><span class="value">Try it in the browser</span><span class="arr">↗</span></a></li>
+      <li><a href="#"><span class="label">Repository</span><span class="value">github.com/Nero-Kong/project-one</span><span class="arr">↗</span></a></li>
+      <li><a href="#"><span class="label">Paper</span><span class="value">Read the technical report (PDF)</span><span class="arr">↗</span></a></li>
+      <li><a href="#"><span class="label">Talk</span><span class="value">Slides from XX Workshop, Oct 2026</span><span class="arr">↗</span></a></li>
+    </ul>
+  </section>
+
+  <nav class="project-bottom-nav">
+    <a href="index.html" class="prev">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+      All projects
+    </a>
+    <a href="project.html" class="next">
+      <span class="next-label">Next</span>
+      <span class="next-title">Project Two →</span>
+    </a>
+  </nav>
+
+  <footer class="footer">
+    <span>© 2026 Nero Kong</span>
+    <span>Updated November 2026</span>
+  </footer>
+
+</main>
+
+<script>
+const root = document.documentElement;
+const themeBtn = document.getElementById('theme-btn');
+const themeIcon = document.getElementById('theme-icon');
+const moonIcon = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+const sunIcon  = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>';
+function setTheme(t) {
+  root.setAttribute('data-theme', t);
+  themeIcon.innerHTML = t === 'dark' ? sunIcon : moonIcon;
+  try { localStorage.setItem('theme', t); } catch(e) {}
+}
+try {
+  const saved = localStorage.getItem('theme');
+  if (saved) setTheme(saved);
+} catch(e) {}
+themeBtn.addEventListener('click', () => {
+  setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+});
+
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 8);
+}, { passive: true });
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === 't' || e.key === 'T') themeBtn.click();
+});
+</script>
+</body>
+</html>

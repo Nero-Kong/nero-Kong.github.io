@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Project One — Nero Kong</title>
+<title>AdaptiveFly — Lingrong Kong</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -513,15 +513,8 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
 <nav class="nav" id="nav">
   <a href="index.html" class="back-link">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-    All projects
+    Back
   </a>
-  <div class="nav-right">
-    <button class="icon-btn" id="theme-btn" title="Toggle theme">
-      <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-      </svg>
-    </button>
-  </div>
 </nav>
 
 <main class="main">
@@ -530,132 +523,112 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
     <div class="project-meta-top">
       <span>2026</span>
       <span class="dot"></span>
-      <span>Software</span>
+      <span>Augmented Humans Intl. Conf.</span>
       <span class="dot"></span>
       <span>Tokyo, Japan</span>
     </div>
-    <h1 class="project-title-big">Project One</h1>
+    <h1 class="project-title-big">AdaptiveFly</h1>
     <p class="project-lead">
-      A small but carefully built tool for distributed model serving. Used by several teams in production. This page documents what it is, why it exists, and how it works.
+      A bio-congruent embodied 3D flight technique. Instead of fixing the coupling between head rotation and yaw control, AdaptiveFly dynamically adjusts it based on flight speed — supporting both free visual exploration and intuitive steering.
     </p>
     <div class="project-actions">
-      <a href="#" class="btn-primary">
-        Visit live <span class="arrow">↗</span>
+      <a href="https://dl.acm.org/doi/10.1145/3795011.3795050" target="_blank" rel="noopener" class="btn-primary">
+        Read the paper <span class="arrow">↗</span>
       </a>
-      <a href="#" class="btn-ghost">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
-        View on GitHub
+      <a href="#bibtex" class="btn-ghost">
+        BibTeX
       </a>
     </div>
   </header>
 
-  <div class="project-cover">
-    <span class="cover-glyph">⌘</span>
+  <div class="project-cover" style="background: linear-gradient(135deg, #3b6db5, #1e3a6b);">
+    <span class="cover-glyph">✦</span>
   </div>
 
   <section class="project-section">
     <h2>— Overview</h2>
     <p>
-      This project began as a quiet experiment to understand why our distributed inference setup was so brittle under realistic load. What started as a debugging tool turned into a full reimplementation of the serving layer, now adopted across several teams and handling production traffic at scale.
+      Existing 3D flight techniques in VR force a tradeoff: tight head-yaw coupling makes steering responsive but blocks free observation, while weak coupling supports observation but makes navigation feel sluggish. AdaptiveFly removes this tradeoff by making the coupling itself <strong>adaptive to context</strong>.
     </p>
     <p>
-      The core idea is simple: instead of treating each request as independent, we batch by structural similarity and route through a learned scheduling layer. The result is roughly <strong>3.4× throughput improvement</strong> on long-context workloads with no quality regression.
+      Drawing on how humans naturally adjust gaze-head-body coordination when moving, AdaptiveFly weakens the head-to-yaw coupling at low speeds — so the user is free to look around — and strengthens it at high speeds — so steering remains precise and intuitive.
     </p>
   </section>
 
   <div class="pull-quote">
-    The interesting bottleneck is rarely where you expect it. Most of our latency turned out to live in scheduling, not compute.
-    <span class="cite">— from the design doc</span>
+    Context-adaptive coupling, not a fixed mapping, is what makes embodied locomotion feel transparent.
+    <span class="cite">— AdaptiveFly, AHs 2026</span>
   </div>
 
   <section class="project-section">
-    <h2>— Architecture</h2>
+    <h2>— Approach</h2>
     <p>
-      The system has three pieces. A <em>request shaper</em> that normalizes incoming requests into a canonical form. A <em>scheduler</em> that batches by predicted compute cost. And a <em>worker pool</em> that runs the actual model with adaptive memory allocation.
+      The control law continuously interpolates between two regimes based on the user's current flight speed. At low speeds, head rotation drives gaze with minimal effect on flight direction, preserving the ability to <em>independently observe</em> the environment. At high speeds, head rotation strongly couples into yaw, giving direct and responsive steering.
     </p>
     <p>
-      The scheduler is the most interesting piece. It uses a small learned model trained on production traces to predict per-request cost before the request is dispatched. This lets us pack batches more aggressively without risking out-of-memory failures.
-    </p>
-    <p>
-      A full architecture write-up is available in the <a href="#">technical report</a>.
+      The principle is platform-agnostic: the same control law generalizes from virtual avatars to physical aerial robots. We demonstrate this by porting AdaptiveFly to a commercial quadcopter and confirming that the bio-congruent feedback structure transfers without modification.
     </p>
   </section>
 
   <section class="project-section">
-    <h2>— Outcomes</h2>
+    <h2>— Findings</h2>
     <p>
-      Deployed to production in March 2026. Currently handling the majority of long-context inference traffic at our company. Adopted by three additional teams. Open-sourced as a reference implementation in October 2026.
+      A user study compared AdaptiveFly against fixed-coupling baselines across precision navigation, dynamic efficiency, and independent observation tasks.
+    </p>
+    <p>
+      AdaptiveFly matched the baselines on precision and efficiency while <strong>significantly outperforming them on tasks requiring independent observation and stability</strong>. Participants also reported smoother motion quality, a stronger sense of self-location, and reduced cybersickness.
     </p>
   </section>
 
   <section class="project-section">
-    <h2>— Stack</h2>
-    <div class="tech-list">
-      <span class="tech-tag">Python</span>
-      <span class="tech-tag">PyTorch</span>
-      <span class="tech-tag">Rust</span>
-      <span class="tech-tag">gRPC</span>
-      <span class="tech-tag">Kubernetes</span>
-      <span class="tech-tag">Prometheus</span>
-    </div>
+    <h2>— Authors</h2>
+    <p>
+      <strong>Lingrong Kong</strong>, Amaury Dechaux, Maika Yoshida, Hirosuke Asahi, Jiayi Xu, Gowrishankar Ganesh, and Masahiko Inami.
+    </p>
+    <p>
+      Research Center for Advanced Science and Technology (RCAST), The University of Tokyo.
+    </p>
   </section>
 
   <section class="project-section">
     <h2>— Links</h2>
     <ul class="link-list">
-      <li><a href="#"><span class="label">Live demo</span><span class="value">Try it in the browser</span><span class="arr">↗</span></a></li>
-      <li><a href="#"><span class="label">Repository</span><span class="value">github.com/Nero-Kong/project-one</span><span class="arr">↗</span></a></li>
-      <li><a href="#"><span class="label">Paper</span><span class="value">Read the technical report (PDF)</span><span class="arr">↗</span></a></li>
-      <li><a href="#"><span class="label">Talk</span><span class="value">Slides from XX Workshop, Oct 2026</span><span class="arr">↗</span></a></li>
+      <li><a href="https://dl.acm.org/doi/10.1145/3795011.3795050" target="_blank" rel="noopener"><span class="label">Paper</span><span class="value">ACM Digital Library (DOI)</span><span class="arr">↗</span></a></li>
+      <li><a href="https://dl.acm.org/doi/proceedings/10.1145/3795011" target="_blank" rel="noopener"><span class="label">Proceedings</span><span class="value">Augmented Humans Intl. Conf. 2026</span><span class="arr">↗</span></a></li>
     </ul>
+  </section>
+
+  <section class="project-section" id="bibtex">
+    <h2>— BibTeX</h2>
+    <pre style="font-family: var(--mono); font-size: 12px; color: var(--ink-2); background: var(--glass); border: 1px solid var(--glass-border); border-radius: 10px; padding: 16px 18px; overflow-x: auto; white-space: pre-wrap; line-height: 1.6; box-shadow: inset 0 1px 0 var(--glass-highlight);">@inproceedings{kong2026adaptivefly,
+  title     = {AdaptiveFly: Bio-Congruent Adaptation for Embodied 3D Locomotion},
+  author    = {Kong, Lingrong and Dechaux, Amaury and Yoshida, Maika and Asahi, Hirosuke and Xu, Jiayi and Ganesh, Gowrishankar and Inami, Masahiko},
+  booktitle = {Proceedings of the Augmented Humans International Conference 2026},
+  pages     = {345--356},
+  year      = {2026},
+  doi       = {10.1145/3795011.3795050}
+}</pre>
   </section>
 
   <nav class="project-bottom-nav">
     <a href="index.html" class="prev">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-      All projects
-    </a>
-    <a href="project.html" class="next">
-      <span class="next-label">Next</span>
-      <span class="next-title">Project Two →</span>
+      Back to home
     </a>
   </nav>
 
   <footer class="footer">
-    <span>© 2026 Nero Kong</span>
-    <span>Updated November 2026</span>
+    <span>© 2026 Lingrong Kong</span>
+    <span>AdaptiveFly · AHs 2026</span>
   </footer>
 
 </main>
 
 <script>
-const root = document.documentElement;
-const themeBtn = document.getElementById('theme-btn');
-const themeIcon = document.getElementById('theme-icon');
-const moonIcon = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
-const sunIcon  = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>';
-function setTheme(t) {
-  root.setAttribute('data-theme', t);
-  themeIcon.innerHTML = t === 'dark' ? sunIcon : moonIcon;
-  try { localStorage.setItem('theme', t); } catch(e) {}
-}
-try {
-  const saved = localStorage.getItem('theme');
-  if (saved) setTheme(saved);
-} catch(e) {}
-themeBtn.addEventListener('click', () => {
-  setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-});
-
 const nav = document.getElementById('nav');
 window.addEventListener('scroll', () => {
   nav.classList.toggle('scrolled', window.scrollY > 8);
 }, { passive: true });
-
-document.addEventListener('keydown', e => {
-  if (e.target.tagName === 'INPUT' || e.metaKey || e.ctrlKey || e.altKey) return;
-  if (e.key === 't' || e.key === 'T') themeBtn.click();
-});
 </script>
 </body>
 </html>

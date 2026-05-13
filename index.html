@@ -58,12 +58,6 @@ html { scroll-behavior: smooth; }
 
 body {
   background-color: var(--bg);
-  background-image:
-    radial-gradient(at 12% 18%, rgba(70, 110, 170, 0.14), transparent 50%),
-    radial-gradient(at 88% 22%, rgba(130, 160, 200, 0.10), transparent 50%),
-    radial-gradient(at 55% 95%, rgba(180, 200, 220, 0.16), transparent 55%),
-    radial-gradient(at 35% 55%, rgba(155, 175, 200, 0.09), transparent 60%);
-  background-attachment: fixed;
   color: var(--ink);
   font-family: var(--sans);
   font-size: 15px;
@@ -73,14 +67,6 @@ body {
   transition: background-color 0.3s, color 0.3s;
   min-height: 100vh;
   overflow-x: hidden;
-}
-
-[data-theme="dark"] body {
-  background-image:
-    radial-gradient(at 12% 18%, rgba(60, 100, 160, 0.22), transparent 50%),
-    radial-gradient(at 88% 22%, rgba(100, 130, 180, 0.13), transparent 50%),
-    radial-gradient(at 55% 95%, rgba(80, 120, 170, 0.18), transparent 55%),
-    radial-gradient(at 35% 55%, rgba(70, 100, 160, 0.10), transparent 60%);
 }
 
 ::selection { background: var(--accent); color: white; }
@@ -338,6 +324,18 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
 .carousel-btn-prev { left: -18px; }
 .carousel-btn-next { right: -18px; }
 .carousel-btn:disabled { opacity: 0; pointer-events: none; }
+
+.project-card-empty {
+  background: transparent;
+  border: 1px dashed var(--rule-2);
+  box-shadow: none;
+  cursor: default;
+}
+.project-card-empty:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--rule-2);
+}
 
 .project-card {
   display: block;
@@ -748,6 +746,19 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
           </div>
         </div>
       </a>
+
+      <div class="project-card project-card-empty" aria-hidden="true">
+        <div class="project-thumb" style="background: transparent; display: flex; align-items: center; justify-content: center;">
+          <span class="project-glyph" style="color: var(--ink-3); font-size: 36px; font-weight: 200;">+</span>
+        </div>
+        <div class="project-content">
+          <h3 class="project-title" style="color: var(--ink-3);">Coming soon</h3>
+          <p class="project-desc">Placeholder card — future projects will appear here.</p>
+          <div class="project-meta">
+            <span>—</span><span class="dot"></span><span>TBD</span>
+          </div>
+        </div>
+      </div>
 
     </div>
     </div>

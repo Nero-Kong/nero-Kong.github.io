@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Diseased Crop AR — Lingrong Kong</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #f4f5f7;
+  --ink: #0f1419;
+  --ink-2: #4a5568;
+  --ink-3: #94a3b8;
+  --rule: rgba(15, 20, 25, 0.08);
+  --rule-2: rgba(15, 20, 25, 0.14);
+  --accent: #2c5282;
+  --accent-soft: rgba(44, 82, 130, 0.08);
+
+  --glass: rgba(255, 255, 255, 0.55);
+  --glass-strong: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-highlight: rgba(255, 255, 255, 0.6);
+
+  --shadow: 0 1px 2px rgba(15,20,25,0.03), 0 6px 20px rgba(15,20,25,0.06);
+  --shadow-lg: 0 6px 20px rgba(15,20,25,0.06), 0 28px 70px -10px rgba(15,20,25,0.2);
+
+  --sans: "Manrope", -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+[data-theme="dark"] {
+  --bg: #0a0e14;
+  --ink: #f0f2f5;
+  --ink-2: #94a3b8;
+  --ink-3: #64748b;
+  --rule: rgba(255, 255, 255, 0.07);
+  --rule-2: rgba(255, 255, 255, 0.14);
+  --accent: #4a7fbf;
+  --accent-soft: rgba(74, 127, 191, 0.18);
+
+  --glass: rgba(255, 255, 255, 0.04);
+  --glass-strong: rgba(15, 20, 25, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.06);
+
+  --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.5), 0 28px 70px -8px rgba(0,0,0,0.6);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(at 12% 18%, rgba(70, 110, 170, 0.14), transparent 50%),
+    radial-gradient(at 88% 22%, rgba(130, 160, 200, 0.10), transparent 50%),
+    radial-gradient(at 55% 95%, rgba(180, 200, 220, 0.16), transparent 55%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.55;
+  letter-spacing: -0.008em;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s, color 0.3s;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+[data-theme="dark"] body {
+  background-image:
+    radial-gradient(at 12% 18%, rgba(60, 100, 160, 0.22), transparent 50%),
+    radial-gradient(at 88% 22%, rgba(100, 130, 180, 0.13), transparent 50%),
+    radial-gradient(at 55% 95%, rgba(80, 120, 170, 0.18), transparent 55%);
+}
+
+::selection { background: var(--accent); color: white; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; background: none; border: none; color: inherit; cursor: pointer; }
+
+/* Nav */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: var(--glass);
+  backdrop-filter: blur(28px) saturate(140%);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
+  border-bottom: 1px solid transparent;
+  transition: background 0.3s, border-color 0.3s;
+}
+.nav.scrolled { border-bottom-color: var(--rule); }
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  padding: 4px 10px 4px 6px;
+  margin: -4px -6px -4px -10px;
+  border-radius: 7px;
+  transition: background 0.2s;
+}
+.back-link:hover { background: var(--glass-strong); }
+.back-link svg { width: 14px; height: 14px; transition: transform 0.4s var(--ease); color: var(--ink-2); }
+.back-link:hover svg { transform: translateX(-3px); color: var(--accent); }
+
+.nav-right { display: flex; align-items: center; gap: 8px; }
+
+.icon-btn {
+  width: 32px; height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  color: var(--ink-2);
+  transition: background 0.2s, color 0.2s;
+}
+.icon-btn:hover { background: var(--glass-strong); color: var(--ink); }
+.icon-btn svg { width: 15px; height: 15px; }
+
+/* Main */
+.main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 110px 24px 60px;
+}
+
+/* Project header */
+.project-header { margin-bottom: 36px; }
+
+.project-meta-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 20px;
+}
+.project-meta-top .dot {
+  width: 3px; height: 3px;
+  background: var(--ink-3);
+  border-radius: 50%;
+}
+
+.project-title-big {
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 700;
+  letter-spacing: -0.036em;
+  line-height: 1.02;
+  margin-bottom: 16px;
+}
+
+.project-lead {
+  font-size: 18px;
+  color: var(--ink-2);
+  line-height: 1.5;
+  max-width: 58ch;
+  margin-bottom: 32px;
+  font-weight: 400;
+}
+
+.project-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: linear-gradient(180deg, #1a1d23, #0f1419);
+  color: white;
+  border-radius: 9px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    inset 0 -1px 0 rgba(0,0,0,0.4),
+    0 1px 0 rgba(255,255,255,0.6),
+    0 8px 20px rgba(15,20,25,0.22);
+  transition: transform 0.2s;
+}
+[data-theme="dark"] .btn-primary {
+  background: linear-gradient(180deg, #f5f5f5, #d8d8d8);
+  color: var(--ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    inset 0 -1px 0 rgba(0,0,0,0.08),
+    0 8px 20px rgba(0,0,0,0.4);
+}
+.btn-primary:hover { transform: translateY(-1px); }
+.btn-primary .arrow {
+  display: inline-block;
+  transition: transform 0.4s var(--ease);
+}
+.btn-primary:hover .arrow { transform: translateX(2px); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  color: var(--ink-2);
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: 9px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+  transition: background 0.2s, color 0.2s;
+}
+.btn-ghost:hover { background: var(--glass-strong); color: var(--ink); }
+.btn-ghost svg { width: 14px; height: 14px; }
+
+/* Project cover */
+.project-cover {
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, #3b556d, #1e293b);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 56px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.15),
+    var(--shadow-lg);
+}
+.project-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(at 25% 25%, rgba(255,255,255,0.15), transparent 50%),
+    radial-gradient(at 75% 80%, rgba(0,0,0,0.2), transparent 60%);
+}
+.cover-glyph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 112px;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 300;
+  z-index: 1;
+}
+
+/* Sections */
+.project-section { margin-bottom: 48px; }
+
+.project-section h2 {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.project-section p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--ink);
+  margin-bottom: 14px;
+  max-width: 64ch;
+}
+.project-section p:last-child { margin-bottom: 0; }
+.project-section em { font-style: italic; color: var(--ink); }
+.project-section strong { font-weight: 600; }
+.project-section a {
+  color: var(--accent);
+  border-bottom: 1px solid var(--accent-soft);
+  transition: border-color 0.2s;
+}
+.project-section a:hover { border-bottom-color: var(--accent); }
+
+/* Pull quote */
+.pull-quote {
+  margin: 32px 0;
+  padding: 24px 28px;
+  background: var(--glass);
+  backdrop-filter: blur(28px) saturate(140%);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--shadow);
+  font-size: 17px;
+  font-style: italic;
+  color: var(--ink);
+  line-height: 1.55;
+  position: relative;
+}
+.pull-quote::before {
+  content: '"';
+  position: absolute;
+  top: 4px; left: 12px;
+  font-size: 48px;
+  color: var(--ink-3);
+  opacity: 0.4;
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+.pull-quote .cite {
+  display: block;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-3);
+  margin-top: 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: var(--mono);
+}
+
+/* Tech stack */
+.tech-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tech-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  background: var(--glass);
+  backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-2);
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+}
+
+/* Link list */
+.link-list {
+  list-style: none;
+  margin-top: 16px;
+}
+.link-list li { border-top: 1px solid var(--rule); }
+.link-list li:last-child { border-bottom: 1px solid var(--rule); }
+.link-list a {
+  display: grid;
+  grid-template-columns: 100px 1fr 24px;
+  gap: 16px;
+  padding: 14px 0;
+  align-items: baseline;
+  transition: padding 0.4s var(--ease);
+}
+.link-list a:hover { padding-left: 12px; padding-right: 12px; }
+.link-list .label {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.link-list .value {
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+}
+.link-list .arr {
+  color: var(--ink-3);
+  font-size: 13px;
+  text-align: right;
+  transition: color 0.2s, transform 0.4s var(--ease);
+}
+.link-list a:hover .arr { color: var(--accent); transform: translateX(3px); }
+
+/* Bottom nav */
+.project-bottom-nav {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.project-bottom-nav a {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  letter-spacing: -0.012em;
+  transition: color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.project-bottom-nav a:hover { color: var(--accent); }
+.project-bottom-nav .next-label {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  display: block;
+  margin-bottom: 2px;
+}
+.project-bottom-nav .next-title {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  color: var(--ink);
+}
+.project-bottom-nav .next { text-align: right; }
+
+/* Footer */
+.footer {
+  margin-top: 56px;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+}
+
+/* Tablet & smaller */
+@media (max-width: 720px) {
+  .main { padding: 96px 20px 56px; }
+  .nav { padding: 12px 18px; }
+  .back-link { font-size: 13px; }
+
+  .project-meta-top { font-size: 10px; gap: 6px; margin-bottom: 16px; }
+  .project-title-big { font-size: 32px; }
+  .project-lead { font-size: 16px; line-height: 1.55; margin-bottom: 28px; }
+
+  /* Buttons - bigger touch target */
+  .project-actions { gap: 8px; }
+  .btn-primary, .btn-ghost { font-size: 13px; padding: 12px 18px; }
+
+  .project-cover { aspect-ratio: 16/10; border-radius: 14px; margin-bottom: 40px; }
+  .cover-glyph { font-size: 72px; }
+
+  .project-section { margin-bottom: 36px; }
+  .project-section p { font-size: 15.5px; line-height: 1.65; }
+
+  .pull-quote { padding: 20px 22px; font-size: 16px; margin: 24px 0; }
+
+  .link-list a {
+    grid-template-columns: 80px 1fr 20px;
+    gap: 12px;
+    padding: 14px 0;
+  }
+  .link-list .value { font-size: 14px; }
+
+  .footer { flex-direction: column; gap: 8px; align-items: flex-start; }
+  .project-bottom-nav { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .project-bottom-nav .next { text-align: left; }
+}
+
+/* Small phone */
+@media (max-width: 480px) {
+  .main { padding: 84px 16px 48px; }
+  .nav { padding: 10px 16px; }
+  .project-title-big { font-size: 28px; }
+  .project-lead { font-size: 15px; }
+  .cover-glyph { font-size: 56px; }
+  .project-cover { border-radius: 12px; margin-bottom: 32px; }
+  .project-section p { font-size: 15px; }
+  .pull-quote { padding: 18px 20px; font-size: 15px; }
+
+  /* 小屏按钮全宽 */
+  .project-actions { flex-direction: column; align-items: stretch; }
+  .btn-primary, .btn-ghost { justify-content: center; }
+
+  .link-list a { grid-template-columns: 72px 1fr; gap: 10px; }
+  .link-list .arr { display: none; }
+  .link-list .value { font-size: 13.5px; }
+  .link-list .label { font-size: 10px; }
+}
+
+/* iOS Safari 100vh fix */
+@supports (-webkit-touch-callout: none) {
+  body { min-height: -webkit-fill-available; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <a href="index.html" class="back-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+    Back
+  </a>
+</nav>
+
+<main class="main">
+
+  <header class="project-header">
+    <div class="project-meta-top">
+      <span>2021</span>
+      <span class="dot"></span>
+      <span>IEEE GCCE</span>
+      <span class="dot"></span>
+      <span>Tsukuba, Japan</span>
+    </div>
+    <h1 class="project-title-big">Diseased Crop AR</h1>
+    <p class="project-lead">
+      A drone-and-AR field assistance pipeline for diseased-crop removal. An RTK-GNSS drone surveys the field and pinpoints diseased plants from above; a mobile AR application then overlays in-field guidance to walk the operator straight to each plant.
+    </p>
+    <div class="project-actions">
+      <a href="https://ieeexplore.ieee.org/document/9621767" target="_blank" rel="noopener" class="btn-primary">
+        Read the paper <span class="arrow">↗</span>
+      </a>
+      <a href="#bibtex" class="btn-ghost">
+        BibTeX
+      </a>
+    </div>
+  </header>
+
+  <img src="crop-ar-flight.png"
+       alt="Drone hovering over a field with a marker and the target diseased crop highlighted on the ground"
+       style="display: block; width: 100%; height: auto; border-radius: 16px; margin-bottom: 56px; box-shadow: var(--shadow-lg); background: white;" />
+
+  <section class="project-section">
+    <h2>— Overview</h2>
+    <p>
+      Targeted removal of diseased crops is laborious. Operators traditionally walk the field by eye — looking for visual signs, remembering positions, and hoping nothing was missed. The work scales poorly and is error-prone when plants are far apart or visually similar to healthy ones.
+    </p>
+    <p>
+      This system pairs an autonomous drone with a mobile AR app. The drone captures geo-referenced aerial imagery and locates diseased plants from above; their positions are then handed to a tablet-based AR overlay that guides the operator to each plant in physical space.
+    </p>
+  </section>
+
+  <div class="pull-quote">
+    Finding a sick plant in a field of healthy ones is easy from the sky and hard from the ground. AR closes that gap.
+    <span class="cite">— Diseased Crop Removal Assistance, GCCE 2021</span>
+  </div>
+
+  <section class="project-section">
+    <h2>— Hardware</h2>
+    <p>
+      The drone platform integrates three components: <strong>RTK-GNSS</strong> for centimeter-level positioning, a <strong>gimbal-stabilized camera</strong> for aerial imagery, and an onboard <strong>Jetson Nano</strong> for image processing close to the sensor.
+    </p>
+    <img src="crop-ar-drone.png"
+         alt="Drone platform annotated with RTK-GPS, Jetson Nano, and gimbal-stabilized camera"
+         style="display: block; width: 100%; height: auto; border-radius: 16px; margin-top: 18px; box-shadow: var(--shadow); background: white;" />
+  </section>
+
+  <section class="project-section">
+    <h2>— AR Guidance</h2>
+    <p>
+      A mobile AR application tracks the device pose in real time and overlays markers on the diseased plants identified by the drone. The operator no longer needs to memorize positions — they just follow the on-screen guide through the field.
+    </p>
+    <img src="crop-ar-overlay.png"
+         alt="Mobile AR view: image tracker registered to a marker, with diseased crops highlighted in the field"
+         style="display: block; width: 100%; height: auto; border-radius: 16px; margin-top: 18px; box-shadow: var(--shadow); background: white;" />
+  </section>
+
+  <section class="project-section">
+    <h2>— Findings</h2>
+    <p>
+      Field experiments in outdoor environments verified the accuracy and feasibility of the pipeline. The AR registration stayed stable along realistic walking trajectories, and operators successfully located targeted plants without prior survey of the field.
+    </p>
+  </section>
+
+  <section class="project-section">
+    <h2>— Authors</h2>
+    <p>
+      <strong>Lingrong Kong</strong>, Han Zhang, and Hajime Nobuhara.
+    </p>
+    <p>
+      University of Tsukuba.
+    </p>
+  </section>
+
+  <section class="project-section">
+    <h2>— Links</h2>
+    <ul class="link-list">
+      <li><a href="https://ieeexplore.ieee.org/document/9621767" target="_blank" rel="noopener"><span class="label">Paper</span><span class="value">IEEE Xplore (DOI)</span><span class="arr">↗</span></a></li>
+    </ul>
+  </section>
+
+  <section class="project-section" id="bibtex">
+    <h2>— BibTeX</h2>
+    <pre style="font-family: var(--mono); font-size: 12px; color: var(--ink-2); background: var(--glass); border: 1px solid var(--glass-border); border-radius: 10px; padding: 16px 18px; overflow-x: auto; white-space: pre-wrap; line-height: 1.6; box-shadow: inset 0 1px 0 var(--glass-highlight);">@inproceedings{kong2021diseased,
+  title     = {Diseased Crop Removal Assistance System Using Augmented Reality and Drones},
+  author    = {Kong, Lingrong and Zhang, Han and Nobuhara, Hajime},
+  booktitle = {2021 IEEE 10th Global Conference on Consumer Electronics (GCCE)},
+  pages     = {522--525},
+  year      = {2021},
+  publisher = {IEEE}
+}</pre>
+  </section>
+
+  <nav class="project-bottom-nav">
+    <a href="index.html" class="prev">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+      Back to home
+    </a>
+  </nav>
+
+  <footer class="footer">
+    <span>© 2026 Lingrong Kong</span>
+    <span>Diseased Crop AR · GCCE 2021</span>
+  </footer>
+
+</main>
+
+<script>
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 8);
+}, { passive: true });
+</script>
+</body>
+</html>

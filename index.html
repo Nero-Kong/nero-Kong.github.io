@@ -289,13 +289,15 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
   display: flex;
   gap: 16px;
   overflow-x: auto;
+  overflow-y: hidden;
   scroll-behavior: smooth;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 2px 0 4px;
 }
-.projects-grid::-webkit-scrollbar { display: none; }
+.projects-grid::-webkit-scrollbar { display: none; width: 0; height: 0; background: transparent; }
+.projects-grid::-webkit-scrollbar-track { display: none; }
+.projects-grid::-webkit-scrollbar-thumb { display: none; }
 .projects-grid > .project-card {
   flex: 0 0 calc((100% - 48px) / 4);
   scroll-snap-align: start;

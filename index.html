@@ -291,6 +291,11 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
 .projects-carousel {
   position: relative;
 }
+.projects-grid-viewport {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black calc(100% - 32px), transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black calc(100% - 32px), transparent 100%);
+}
 .projects-grid {
   display: flex;
   gap: 16px;
@@ -299,7 +304,10 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 20px 0 30px;
+  padding-top: 20px;
+  padding-bottom: 90px;
+  margin-top: -20px;
+  margin-bottom: -30px;
 }
 .projects-grid::-webkit-scrollbar { display: none; width: 0; height: 0; }
 .projects-grid > .project-card {
@@ -705,6 +713,7 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
     <button class="carousel-btn carousel-btn-next" id="carousel-next" aria-label="Next projects">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
+    <div class="projects-grid-viewport">
     <div class="projects-grid" id="projects-grid">
 
       <a href="project.html" class="project-card">
@@ -772,6 +781,7 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
         </div>
       </div>
 
+    </div>
     </div>
     </div>
   </section>

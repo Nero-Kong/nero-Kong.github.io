@@ -197,7 +197,8 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
   transition: background 0.2s, color 0.2s;
 }
 .menu-btn:hover { background: var(--glass-strong); color: var(--ink); }
-.menu-btn svg { width: 18px; height: 18px; }
+.menu-btn svg { width: 18px; height: 18px; transition: transform 0.35s var(--spring); }
+.menu-btn.open svg { transform: rotate(90deg); }
 
 .menu-panel {
   position: fixed;
@@ -285,19 +286,21 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
 .projects-carousel {
   position: relative;
 }
+.projects-grid-viewport {
+  overflow: hidden;
+}
 .projects-grid {
   display: flex;
   gap: 16px;
   overflow-x: auto;
-  overflow-y: hidden;
   scroll-behavior: smooth;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  padding-bottom: 30px;
+  margin-bottom: -30px;
 }
-.projects-grid::-webkit-scrollbar { display: none; width: 0; height: 0; background: transparent; }
-.projects-grid::-webkit-scrollbar-track { display: none; }
-.projects-grid::-webkit-scrollbar-thumb { display: none; }
+.projects-grid::-webkit-scrollbar { display: none; width: 0; height: 0; }
 .projects-grid > .project-card {
   flex: 0 0 calc((100% - 48px) / 4);
   scroll-snap-align: start;
@@ -326,6 +329,18 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
 .carousel-btn-prev { left: -18px; }
 .carousel-btn-next { right: -18px; }
 .carousel-btn:disabled { opacity: 0; pointer-events: none; }
+
+.project-card-empty {
+  background: transparent;
+  border: 1px dashed var(--rule-2);
+  box-shadow: none;
+  cursor: default;
+}
+.project-card-empty:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--rule-2);
+}
 
 .project-card {
   display: block;
@@ -685,6 +700,7 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
     <button class="carousel-btn carousel-btn-next" id="carousel-next" aria-label="Next projects">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
+    <div class="projects-grid-viewport">
     <div class="projects-grid" id="projects-grid">
 
       <a href="project.html" class="project-card">
@@ -739,7 +755,20 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
         </div>
       </a>
 
+      <div class="project-card project-card-empty" aria-hidden="true">
+        <div class="project-thumb" style="background: transparent; display: flex; align-items: center; justify-content: center;">
+          <span class="project-glyph" style="color: var(--ink-3); font-size: 36px; font-weight: 200;">+</span>
+        </div>
+        <div class="project-content">
+          <h3 class="project-title" style="color: var(--ink-3);">Coming soon</h3>
+          <p class="project-desc">Placeholder card — future projects will appear here.</p>
+          <div class="project-meta">
+            <span>—</span><span class="dot"></span><span>TBD</span>
+          </div>
+        </div>
+      </div>
 
+    </div>
     </div>
     </div>
   </section>
@@ -943,6 +972,7 @@ const menuOverlay = document.getElementById('menu-overlay');
 function setMenu(open) {
   menuPanel.classList.toggle('open', open);
   menuOverlay.classList.toggle('open', open);
+  menuBtn.classList.toggle('open', open);
   menuBtn.setAttribute('aria-expanded', String(open));
 }
 menuBtn?.addEventListener('click', (e) => {

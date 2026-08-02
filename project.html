@@ -258,6 +258,28 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
 /* Sections */
 .project-section { margin-bottom: 48px; }
 
+.project-video {
+  margin: -24px 0 56px;
+}
+
+.video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #0f1419;
+  box-shadow: var(--shadow-lg);
+}
+
+.video-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
 .project-section h2 {
   font-family: var(--mono);
   font-size: 10.5px;
@@ -529,9 +551,20 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
     </div>
   </header>
 
-  <img src="ahs2026-39-fig1.jpg"
-       alt="AdaptiveFly teaser: (a) user experience photo, (b) exploration/observation at low velocity, (c) fast steering/turning at high velocity"
+  <img src="adaptivefly-cover.png"
+       alt="AdaptiveFly representative image showing VR 3D locomotion and robot teleoperation"
        style="display: block; width: 100%; height: auto; border-radius: 16px; margin-bottom: 56px; box-shadow: var(--shadow-lg); background: white;" />
+
+  <section class="project-video" aria-label="AdaptiveFly video">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube.com/embed/_pgiGFt0LOY"
+        title="AdaptiveFly video"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+  </section>
 
   <section class="project-section">
     <h2>— Overview</h2>

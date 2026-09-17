@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PanoSomaFly — Lingrong Kong</title>
+<meta name="description" content="PanoSomaFly explores immersive drone teleoperation with live 360° video and body-based flight control. Watch the demonstration." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #f4f5f7;
+  --ink: #0f1419;
+  --ink-2: #4a5568;
+  --ink-3: #94a3b8;
+  --rule: rgba(15, 20, 25, 0.08);
+  --accent: #2c5282;
+  --glass: rgba(255, 255, 255, 0.55);
+  --glass-strong: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-highlight: rgba(255, 255, 255, 0.6);
+  --shadow-lg: 0 6px 20px rgba(15,20,25,0.06), 0 28px 70px -10px rgba(15,20,25,0.2);
+  --sans: "Manrope", -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.55;
+  letter-spacing: -0.008em;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+::selection { background: var(--accent); color: white; }
+a { color: inherit; text-decoration: none; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  padding: 14px 24px;
+  background: var(--glass);
+  backdrop-filter: blur(28px) saturate(140%);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
+  border-bottom: 1px solid transparent;
+  transition: background 0.3s, border-color 0.3s;
+}
+.nav.scrolled { border-bottom-color: var(--rule); }
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  padding: 4px 10px 4px 6px;
+  margin: -4px -6px -4px -10px;
+  border-radius: 7px;
+  transition: background 0.2s;
+}
+.back-link:hover { background: var(--glass-strong); }
+.back-link svg { width: 14px; height: 14px; color: var(--ink-2); transition: transform 0.4s var(--ease); }
+.back-link:hover svg { transform: translateX(-3px); color: var(--accent); }
+
+.main { max-width: 1100px; margin: 0 auto; padding: 110px 24px 60px; }
+.project-header { margin-bottom: 36px; }
+.project-meta-top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 20px;
+}
+.project-meta-top .dot { width: 3px; height: 3px; background: var(--ink-3); border-radius: 50%; }
+.project-title-big {
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 700;
+  letter-spacing: -0.036em;
+  line-height: 1.02;
+  margin-bottom: 16px;
+}
+.project-lead {
+  font-size: 18px;
+  color: var(--ink-2);
+  line-height: 1.5;
+  max-width: 58ch;
+  margin-bottom: 24px;
+}
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  color: var(--ink-2);
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: 9px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+  transition: background 0.2s, color 0.2s;
+}
+.btn-ghost:hover { background: var(--glass-strong); color: var(--ink); }
+
+.video-frame {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #0a0e14;
+  box-shadow: var(--shadow-lg);
+}
+.video-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+figcaption { margin-top: 16px; font-size: 13px; color: var(--ink-2); }
+.footer {
+  margin-top: 56px;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 720px) {
+  .main { padding: 96px 20px 56px; }
+  .nav { padding: 12px 18px; }
+  .back-link { font-size: 13px; }
+  .project-meta-top { font-size: 10px; gap: 6px; margin-bottom: 16px; }
+  .project-title-big { font-size: 32px; }
+  .project-lead { font-size: 16px; line-height: 1.55; }
+  .btn-ghost { font-size: 13px; padding: 12px 18px; }
+  .video-frame { border-radius: 14px; }
+  .footer { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+  .main { padding: 84px 16px 48px; }
+  .nav { padding: 10px 16px; }
+  .project-title-big { font-size: 28px; }
+  .project-lead { font-size: 15px; }
+  .video-frame { border-radius: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav" aria-label="Project navigation">
+  <a href="index.html#projects" class="back-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+    Back to projects
+  </a>
+</nav>
+
+<main class="main">
+  <header class="project-header">
+    <div class="project-meta-top">
+      <span>2026</span><span class="dot" aria-hidden="true"></span><span>VR · Drone teleoperation</span>
+    </div>
+    <h1 class="project-title-big">PanoSomaFly</h1>
+    <p class="project-lead">
+      An immersive drone teleoperation prototype combining live 360° video with body-based flight control. A head-mounted display lets operators look around the remote environment, while body movements provide flight input.
+    </p>
+    <a href="https://youtu.be/KwQ4Lu37bD0" target="_blank" rel="noopener noreferrer" class="btn-ghost">
+      Watch on YouTube <span aria-hidden="true">↗</span>
+    </a>
+  </header>
+
+  <figure aria-label="PanoSomaFly demonstration">
+    <div class="video-frame">
+      <iframe
+        src="https://www.youtube.com/embed/KwQ4Lu37bD0"
+        title="PanoSomaFly demonstration video"
+        width="960" height="540"
+        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+    </div>
+    <figcaption>Live panoramic viewing and body-based drone control.</figcaption>
+  </figure>
+
+  <footer class="footer">
+    <span>© 2026 Lingrong Kong</span>
+    <span>PanoSomaFly</span>
+  </footer>
+</main>
+
+<script>
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 8);
+}, { passive: true });
+</script>
+</body>
+</html>

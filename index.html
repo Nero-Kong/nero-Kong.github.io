@@ -236,26 +236,29 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
 
 .social-btn {
   width: 36px; height: 36px;
-  background: var(--glass);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
-  border: 1px solid var(--glass-border);
-  border-radius: 10px;
+  background: none;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ink-2);
-  box-shadow: inset 0 1px 0 var(--glass-highlight);
-  transition: background 0.2s, color 0.2s, transform 0.3s var(--spring), border-color 0.2s;
   position: relative;
 }
-.social-btn:hover {
-  background: var(--glass-strong);
-  color: var(--ink);
-  transform: translateY(-3px);
-  border-color: var(--rule-2);
+.social-btn img {
+  width: 20px; height: 20px;
+  flex-shrink: 0;
+  display: block;
+  object-fit: contain;
+  transition: transform 0.2s var(--ease);
 }
-.social-btn svg { width: 18px; height: 18px; }
+.social-btn:focus-visible { outline: none; }
+.social-btn:focus-visible img, .social-btn:active img { transform: scale(1.25); }
+@media (hover: hover) and (pointer: fine) {
+  .social-btn:hover img { transform: scale(1.25); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .social-btn img { transition: none; }
+}
+[data-theme="dark"] .social-icon-monochrome { filter: brightness(0) invert(1); }
 .social-btn .tip {
   position: absolute;
   bottom: calc(100% + 6px);
@@ -273,7 +276,7 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
   pointer-events: none;
   transition: opacity 0.2s, transform 0.2s;
 }
-.social-btn:hover .tip { opacity: 1; transform: translateX(-50%) translateY(0); }
+.social-btn:hover .tip, .social-btn:focus-visible .tip { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ── SECTIONS ────────────────────────────── */
 .section { margin-bottom: 80px; }
@@ -594,7 +597,7 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
   .intro { font-size: 15px; line-height: 1.6; margin-bottom: 22px; }
 
   /* 44×44 触摸目标，符合 iOS 标准 */
-  .social-btn { width: 44px; height: 44px; border-radius: 11px; }
+  .social-btn { width: 44px; height: 44px; }
   .social-btn .tip { display: none; }
 
   .projects-grid { gap: 12px; }
@@ -670,27 +673,27 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
     </div>
     <div class="social-icons">
         <a href="https://scholar.google.com/citations?user=DQXFf1sAAAAJ&hl=en" class="social-btn" aria-label="Google Scholar" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          <img src="assets/social/google-scholar.ico" alt="" width="20" height="20" aria-hidden="true">
           <span class="tip">Google Scholar</span>
         </a>
         <a href="https://github.com/Nero-Kong" class="social-btn" aria-label="GitHub">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          <img src="assets/social/github.svg" class="social-icon-monochrome" alt="" width="20" height="20" aria-hidden="true">
           <span class="tip">GitHub</span>
         </a>
         <a href="mailto:kong@star.rcast.u-tokyo.ac.jp" class="social-btn" aria-label="Email">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+          <img src="assets/social/gmail.svg" alt="" width="20" height="20" aria-hidden="true">
           <span class="tip">Email</span>
         </a>
         <a href="https://www.linkedin.com/in/lingrong-kong/" class="social-btn" aria-label="LinkedIn" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452z"/></svg>
+          <img src="assets/social/linkedin.ico" alt="" width="20" height="20" aria-hidden="true">
           <span class="tip">LinkedIn</span>
         </a>
         <a href="https://x.com/NeroKong120745/" class="social-btn" aria-label="X" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          <img src="assets/social/x.png" class="social-icon-monochrome" alt="" width="20" height="20" aria-hidden="true">
           <span class="tip">X</span>
         </a>
         <a href="https://www.instagram.com/nero_kong/" class="social-btn" aria-label="Instagram" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          <img src="assets/social/instagram.webp" alt="" width="20" height="20" aria-hidden="true">
           <span class="tip">Instagram</span>
         </a>
     </div>

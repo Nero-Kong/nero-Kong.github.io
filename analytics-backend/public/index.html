@@ -17,11 +17,12 @@
     <section id="login-view" class="login-view">
       <span class="login-icon" data-icon="KeyRound" aria-hidden="true"></span>
       <h1>Sign in</h1>
-      <form id="login-form">
+      <form id="login-form" hidden>
         <label for="access-key">Access key</label>
         <input id="access-key" type="password" autocomplete="off" spellcheck="false" required minlength="32" maxlength="256">
         <button type="submit" id="login-button" class="primary-button">Sign in</button>
       </form>
+      <button type="button" id="cloudflare-login" class="primary-button" hidden><span data-icon="LogIn" aria-hidden="true"></span>Continue with Cloudflare</button>
       <p id="login-error" class="error" role="alert"></p>
     </section>
     <section id="dashboard" hidden>

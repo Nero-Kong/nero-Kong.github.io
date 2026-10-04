@@ -15,7 +15,10 @@
     "html_handling": "none"
   },
   "vars": {
-    "ALLOWED_ORIGINS": "https://nero-kong.github.io"
+    "ALLOWED_ORIGINS": "https://nero-kong.github.io",
+    "AUTH_MODE": "cloudflare-access",
+    "ACCESS_TEAM_DOMAIN": "https://patient-sound-ed56.cloudflareaccess.com",
+    "ACCESS_AUD": "77b5f7adcbcc7bd5d06013132897baaa1db6e273565c0c2c65622db58a9315bf"
   },
   "d1_databases": [
     {

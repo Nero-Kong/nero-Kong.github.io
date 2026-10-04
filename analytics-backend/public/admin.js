@@ -13,6 +13,7 @@ for (const element of document.querySelectorAll("[data-icon]")) {
 }
 
 let accessKey = "";
+let authMode;
 let offset = 0;
 let activeFilters;
 let controller;
@@ -39,12 +40,17 @@ function params() {
 }
 
 async function api(path, options = {}) {
-  const response = await fetch(path, { ...options, cache: "no-store", credentials: "omit",
-    headers: { Authorization: `Bearer ${accessKey}`, ...options.headers } });
-  if (!response.ok) {
+  const response = await fetch(path, { ...options, cache: "no-store", redirect: "manual",
+    credentials: authMode === "cloudflare-access" ? "same-origin" : "omit",
+    headers: { ...(authMode === "bearer" ? { Authorization: `Bearer ${accessKey}` } : {}), ...options.headers } });
+  const signedOut = response.type === "opaqueredirect" || response.status === 401 || response.status === 403;
+  if (!response.ok || !response.headers.get("Content-Type")?.match(/application\/json|text\/csv/)) {
+    if (signedOut) {
+      showLogin();
+      if (authMode === "cloudflare-access") $("login-error").textContent = "Your session expired. Sign in again.";
+    }
     const message = (await response.json().catch(() => ({}))).error || "Request failed.";
-    if (response.status === 401 && !$("dashboard").hidden) signOut();
-    throw new Error(message);
+    throw new Error(authMode === "cloudflare-access" && signedOut ? "Your session expired. Sign in again." : message);
   }
   return response;
 }
@@ -131,14 +137,24 @@ async function load() {
   }
 }
 
-function signOut() {
+function showLogin() {
   controller?.abort(); accessKey = ""; total = 0; offset = 0;
   $("access-key").value = "";
   $("dashboard").hidden = $("logout").hidden = true;
   $("login-view").hidden = false;
   $("login-error").textContent = "";
   $("visits").replaceChildren(); $("countries").replaceChildren(); $("pages").replaceChildren();
-  $("access-key").focus();
+  if (authMode === "bearer") $("access-key").focus();
+}
+
+function showDashboard() {
+  $("login-view").hidden = true;
+  $("dashboard").hidden = $("logout").hidden = false;
+}
+
+function signOut() {
+  showLogin();
+  if (authMode === "cloudflare-access") location.assign("/cdn-cgi/access/logout");
 }
 
 $("login-form").addEventListener("submit", async event => {
@@ -150,13 +166,13 @@ $("login-form").addEventListener("submit", async event => {
   try {
     await api(`/api/summary?${params()}`);
     $("access-key").value = "";
-    $("login-view").hidden = true;
-    $("dashboard").hidden = $("logout").hidden = false;
+    showDashboard();
     await load();
   } catch (error) { accessKey = ""; $("login-error").textContent = error.message; }
   finally { $("login-button").disabled = false; }
 });
 $("logout").addEventListener("click", signOut);
+$("cloudflare-login").addEventListener("click", () => location.assign("/admin"));
 $("date-range").addEventListener("change", () => {
   const value = $("date-range").value;
   $("from").disabled = $("to").disabled = value === "all";
@@ -191,3 +207,23 @@ $("delete").addEventListener("click", async () => {
     offset = 0; await load();
   } catch (error) { $("dashboard-error").textContent = error.message; $("delete").disabled = false; }
 });
+
+async function initialize() {
+  try {
+    const response = await fetch("/auth-config", { cache: "no-store", credentials: "same-origin" });
+    if (!response.ok) throw new Error("Sign-in is temporarily unavailable.");
+    const config = await response.json();
+    if (!["bearer", "cloudflare-access"].includes(config.mode)) throw new Error("Sign-in is temporarily unavailable.");
+    authMode = config.mode;
+    $("login-form").hidden = authMode !== "bearer";
+    $("cloudflare-login").hidden = authMode !== "cloudflare-access";
+    if (authMode === "cloudflare-access") {
+      await api("/api/session");
+      activeFilters = currentFilters();
+      showDashboard();
+      await load();
+    }
+  } catch (error) { $("login-error").textContent = error.message; }
+}
+
+initialize();

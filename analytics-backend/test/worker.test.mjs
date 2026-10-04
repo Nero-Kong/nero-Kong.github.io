@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { DatabaseSync } from "node:sqlite";
 import { readFileSync } from "node:fs";
+import { generateKeyPair, exportJWK, SignJWT } from "jose";
 import worker, { filters, maskIp, csvCell, tokyoDate } from "../src/worker.js";
 
 const token = "a".repeat(43);
@@ -223,4 +224,43 @@ test("dashboard is public login-only HTML with CSP, frame and cache protection",
   assert.ok(response.headers.get("Content-Security-Policy").includes("script-src 'self'"));
   assert.equal(response.headers.get("Cache-Control"), "no-store");
   assert.equal((await worker.fetch(request("/.production.vars"), env)).status, 404);
+});
+
+test("Access mode never accepts a bearer key or an unverified identity header", async () => {
+  const env = { ...fixture(), AUTH_MODE: "cloudflare-access", ACCESS_TEAM_DOMAIN: "https://test-team.cloudflareaccess.com",
+    ACCESS_AUD: "test-audience-123456789", ACCESS_ALLOWED_EMAIL: "owner@example.com" };
+  for (const path of ["/api/session", "/api/visits", "/api/summary", "/api/export", "/admin", "/index.html"]) {
+    assert.equal((await api(env, path, { headers: { "Cf-Access-Authenticated-User-Email": "owner@example.com" } })).status, 401);
+  }
+  await record(env);
+  assert.equal((await worker.fetch(request("/health"), env)).status, 200);
+  assert.deepEqual(await (await worker.fetch(request("/auth-config"), env)).json(), { mode: "cloudflare-access" });
+  env.ACCESS_AUD = "";
+  assert.equal((await api(env)).status, 503);
+  assert.equal((await worker.fetch(request("/auth-config"), env)).status, 503);
+});
+
+test("Access JWT authorizes data and assets, but deletion still requires the exact origin", async () => {
+  const env = { ...fixture(), AUTH_MODE: "cloudflare-access", ACCESS_TEAM_DOMAIN: "https://integration-team.cloudflareaccess.com",
+    ACCESS_AUD: "integration-audience-123456789", ACCESS_ALLOWED_EMAIL: "owner@example.com" };
+  const { privateKey, publicKey } = await generateKeyPair("RS256");
+  const jwk = await exportJWK(publicKey);
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async url => {
+    assert.equal(String(url), env.ACCESS_TEAM_DOMAIN + "/cdn-cgi/access/certs");
+    return new Response(JSON.stringify({ keys: [{ ...jwk, kid: "integration-key", alg: "RS256", use: "sig" }] }));
+  };
+  try {
+    const jwt = await new SignJWT({ email: env.ACCESS_ALLOWED_EMAIL }).setProtectedHeader({ alg: "RS256", kid: "integration-key" })
+      .setSubject("owner").setIssuer(env.ACCESS_TEAM_DOMAIN).setAudience(env.ACCESS_AUD).setIssuedAt().setExpirationTime("1h").sign(privateKey);
+    const headers = { "Cf-Access-Jwt-Assertion": jwt };
+    await record(env);
+    assert.equal((await api(env, "/admin", { headers })).status, 200);
+    assert.equal((await (await api(env, "/api/session", { headers })).json()).email, env.ACCESS_ALLOWED_EMAIL);
+    assert.equal((await (await api(env, "/api/summary", { headers })).json()).visits, 1);
+    const options = { method: "DELETE", body: JSON.stringify({ confirm: "delete-filtered" }), headers };
+    assert.equal((await api(env, "/api/visits", options)).status, 403);
+    assert.equal((await api(env, "/api/visits", { ...options, headers: { ...headers, Origin: "https://evil.example" } })).status, 403);
+    assert.equal((await (await api(env, "/api/visits", { ...options, headers: { ...headers, Origin: endpoint } })).json()).deleted, 1);
+  } finally { globalThis.fetch = originalFetch; }
 });

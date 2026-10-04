@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import { authReady } from "../src/auth.js";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const cli = fileURLToPath(new URL("../node_modules/wrangler/bin/wrangler.js", import.meta.url));
@@ -34,15 +35,22 @@ try {
   await import("./build-icons.mjs");
 
   const secretFile = new URL("../.production.vars", import.meta.url);
+  const accessMode = config.vars?.AUTH_MODE === "cloudflare-access";
   let accessKey;
   try {
     const secrets = await readFile(secretFile, "utf8");
     accessKey = secrets.match(/^ADMIN_TOKEN=([A-Za-z0-9_-]{32,256})$/m)?.[1];
-    if (!accessKey) throw new Error("The existing .production.vars has an invalid access key. Fix it before deploying.");
+    if (!accessMode && !accessKey) throw new Error("The existing .production.vars has an invalid access key. Fix it before deploying.");
   } catch (error) {
     if (error.code !== "ENOENT") throw error;
+    if (accessMode) throw new Error("Configure the owner email with scripts/configure-access.mjs before deploying.");
     accessKey = randomBytes(32).toString("base64url");
     await writeFile(secretFile, `ADMIN_TOKEN=${accessKey}\n`, { flag: "wx", mode: 0o600 });
+  }
+  if (accessMode) {
+    const secrets = await readFile(secretFile, "utf8");
+    const email = secrets.match(/^ACCESS_ALLOWED_EMAIL=([^\r\n]+)$/m)?.[1];
+    if (!authReady({ ...config.vars, ACCESS_ALLOWED_EMAIL: email })) throw new Error("Cloudflare Access configuration is incomplete. No deployment was made.");
   }
   const output = run(["deploy", "--secrets-file", fileURLToPath(secretFile)]);
   const endpoint = output.match(/https:\/\/lingrong-visitor-analytics\.[a-z0-9-]+\.workers\.dev\b/i)?.[0];
@@ -58,11 +66,11 @@ try {
   }
   if (!healthy) throw new Error("The deployed backend is not healthy. Frontend collection remains unchanged.");
   await writeFile(new URL("../.admin-access.json", import.meta.url),
-    JSON.stringify({ adminUrl: `${endpoint}/admin`, accessKey }, null, 2) + "\n", { mode: 0o600 });
+    JSON.stringify({ adminUrl: `${endpoint}/admin`, ...(accessMode ? { authMode: "cloudflare-access" } : { accessKey }) }, null, 2) + "\n", { mode: 0o600 });
   await writeFile(new URL("../../assets/analytics-config.js", import.meta.url),
     "window.PORTFOLIO_ANALYTICS = Object.freeze(" + JSON.stringify({ endpoint }, null, 2) + ");\n");
   console.log(`Backend ready. Admin: ${endpoint}/admin`);
-  console.log("Access key saved in ignored .admin-access.json; never put it in GitHub or website code.");
+  console.log(accessMode ? "Sign in with the allowed Cloudflare account; no local key file is required." : "Access key saved in ignored .admin-access.json; never put it in GitHub or website code.");
   console.log("Publish the website changes to GitHub Pages to enable automatic visit analytics. This script does not commit or push.");
 } catch (error) {
   console.error(error.message);

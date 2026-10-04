@@ -1,5 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { isIP } from "node:net";
+import { authMode, authReady, accessConfig, verifyAccessToken } from "./auth.js";
 
 const DAY = 86400000;
 const PAGES = new Set(["/", "/index.html", "/project.html", "/panosomafly.html", "/crop-ar.html"]);
@@ -23,7 +24,7 @@ function json(data, status = 200) {
 }
 
 function ready(env) {
-  return Boolean(env.DB && typeof env.ADMIN_TOKEN === "string" && env.ADMIN_TOKEN.length >= 32);
+  return Boolean(env.DB && authReady(env));
 }
 
 function origins(env) {
@@ -94,6 +95,14 @@ async function collect(request, env) {
 
 async function authorize(request, env) {
   if (!ready(env)) throw new HttpError(503, "Analytics is not configured.");
+  if (authMode(env) === "cloudflare-access") {
+    try {
+      return await verifyAccessToken(request.headers.get("Cf-Access-Jwt-Assertion"), accessConfig(env));
+    } catch (_) {
+      await limit(env.ADMIN_LIMITER, request.headers.get("CF-Connecting-IP") || "unknown");
+      throw new HttpError(401, "Cloudflare sign-in required.");
+    }
+  }
   const provided = request.headers.get("Authorization")?.match(/^Bearer ([A-Za-z0-9_-]{32,256})$/)?.[1];
   if (!provided) throw new HttpError(401, "Invalid access key.");
   const encoder = new TextEncoder();
@@ -105,6 +114,7 @@ async function authorize(request, env) {
     await limit(env.ADMIN_LIMITER, request.headers.get("CF-Connecting-IP") || "unknown");
     throw new HttpError(401, "Invalid access key.");
   }
+  return { mode: "bearer" };
 }
 
 export function tokyoDate(timestamp) {
@@ -161,7 +171,8 @@ export function csvCell(value) {
 }
 
 async function adminApi(request, env, url) {
-  await authorize(request, env);
+  const identity = await authorize(request, env);
+  if (url.pathname === "/api/session" && request.method === "GET") return json(identity);
   const selected = filters(url.searchParams);
   const query = (sql, extra = []) => env.DB.prepare(sql).bind(...selected.values, ...extra);
   const reveal = url.searchParams.get("reveal") === "1";
@@ -195,7 +206,7 @@ async function adminApi(request, env, url) {
   }
   if (url.pathname === "/api/visits" && request.method === "DELETE") {
     const origin = request.headers.get("Origin");
-    if (origin && origin !== url.origin) throw new HttpError(403, "Same-origin request required.");
+    if ((identity.mode === "cloudflare-access" || origin) && origin !== url.origin) throw new HttpError(403, "Same-origin request required.");
     const body = await readJson(request);
     if (body.confirm !== "delete-filtered") throw new HttpError(400, "Deletion confirmation required.");
     const result = await query(`DELETE FROM visits WHERE ${selected.where}`).run();
@@ -221,6 +232,10 @@ async function serve(request, env) {
     catch (error) { return cors(errorResponse(error), origin); }
   }
   if (url.pathname.startsWith("/api/")) return adminApi(request, env, url);
+  if (url.pathname === "/auth-config" && request.method === "GET") {
+    if (!authReady(env)) throw new HttpError(503, "Authentication is not configured.");
+    return json({ mode: authMode(env) });
+  }
   if (url.pathname === "/health" && request.method === "GET") {
     if (!ready(env)) return json({ ready: false }, 503);
     await env.DB.prepare("SELECT event_id FROM visits LIMIT 1").all();
@@ -228,6 +243,7 @@ async function serve(request, env) {
   }
   if (!["GET", "HEAD"].includes(request.method)) throw new HttpError(405, "Method not allowed.");
   if (url.pathname === "/") return Response.redirect(new URL("/admin", url), 302);
+  if (authMode(env) === "cloudflare-access" && ["/admin", "/admin/", "/index.html"].includes(url.pathname)) await authorize(request, env);
   if (["/admin", "/admin/"].includes(url.pathname)) url.pathname = "/index.html";
   if (!["/index.html", "/admin.js", "/admin.css", "/icons.js"].includes(url.pathname)) throw new HttpError(404, "Not found.");
   const asset = await env.ASSETS.fetch(new Request(url, request));

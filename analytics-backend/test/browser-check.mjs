@@ -88,6 +88,42 @@ try {
   await page.screenshot({ path: fileURLToPath(new URL("login-mobile.png", artifacts)), fullPage: true });
   assert.deepEqual(errors, []);
 
+  let expired = false;
+  const accessContext = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  await accessContext.addCookies([{ name: "CF_Authorization", value: "synthetic-session", url: origin }]);
+  await accessContext.route(origin + "/auth-config", route => route.fulfill({ json: { mode: "cloudflare-access" } }));
+  await accessContext.route(origin + "/api/**", route => {
+    assert.equal(route.request().headers().authorization, undefined);
+    assert.ok(route.request().headers().cookie?.includes("CF_Authorization=synthetic-session"));
+    if (expired) return route.fulfill({ status: 401, json: { error: "Cloudflare sign-in required." } });
+    const path = new URL(route.request().url()).pathname;
+    const body = path === "/api/session" ? { mode: "cloudflare-access", email: "owner@example.com" }
+      : path === "/api/summary" ? { visits: 0, unique_ips: 0, countries: 0, topCountries: [], pages: [], from: dateForTest(), to: dateForTest() }
+      : { visits: [], hasMore: false, offset: 0 };
+    return route.fulfill({ json: body });
+  });
+  const accessPage = await accessContext.newPage();
+  await accessPage.goto(origin + "/admin");
+  await accessPage.locator("#dashboard").waitFor({ state: "visible" });
+  assert.equal(await accessPage.locator("#login-form").isVisible(), false);
+  await accessPage.locator("#visits .empty").waitFor();
+  await accessPage.screenshot({ path: fileURLToPath(new URL("access-dashboard-desktop.png", artifacts)), fullPage: true });
+  expired = true;
+  await accessPage.locator("#refresh").click();
+  await accessPage.locator("#cloudflare-login").waitFor({ state: "visible" });
+  assert.ok((await accessPage.locator("#login-error").innerText()).includes("expired"));
+  assert.equal(await accessPage.locator("#login-form").isVisible(), false);
+  await accessPage.setViewportSize({ width: 390, height: 844 });
+  assert.equal(await accessPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await accessPage.screenshot({ path: fileURLToPath(new URL("access-session-expired-mobile.png", artifacts)), fullPage: true });
+  expired = false;
+  await accessPage.locator("#cloudflare-login").click();
+  await accessPage.locator("#dashboard").waitFor({ state: "visible" });
+  await accessContext.route(origin + "/cdn-cgi/access/logout", route => route.fulfill({ contentType: "text/html", body: "<h1>Signed out</h1>" }));
+  await accessPage.locator("#logout").click();
+  await accessPage.waitForURL(origin + "/cdn-cgi/access/logout");
+  await accessContext.close();
+
   // A synthetic page verifies the tracker, without loading the real portfolio or third-party media.
   const tracker = await readFile(new URL("../../assets/visitor-analytics.js", import.meta.url), "utf8");
   const testUrl = "https://nero-kong.github.io/tracker-test";
@@ -146,8 +182,10 @@ try {
   const disabledPage = await disabledContext.newPage(); await disabledPage.goto(testUrl);
   assert.equal(await disabledPage.locator("aside, dialog").count(), 0);
   assert.equal(sent.length, 7);
-  console.log("PASS: no public privacy page or visitor confirmation controls, desktop/mobile dashboard, historical/all-date queries, auth, pagination, full IPs, CSV, filters, deletion, logout, automatic logging independent of stored preferences and DNT/GPC, disabled configuration.");
+  console.log("PASS: desktop/mobile dashboard, bearer and simulated Access login, session cookies/expiry/logout, historical queries, pagination, CSV, filtering/deletion, and unchanged automatic visitor logging.");
 } finally {
   await browser?.close();
   sql(`DELETE FROM visits WHERE event_id IN (${testIds.map(id => `'${id}'`).join(",")});`);
 }
+
+function dateForTest() { return new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10); }

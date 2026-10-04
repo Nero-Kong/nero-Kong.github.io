@@ -1,0 +1,17 @@
+{
+  "name": "portfolio-visitor-analytics",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare-local": "node scripts/prepare-local.mjs",
+    "build": "node scripts/build-icons.mjs",
+    "dev": "wrangler dev --port 8788",
+    "migrate-local": "wrangler d1 migrations apply DB --local",
+    "test": "node --test test/*.test.mjs",
+    "deploy": "node scripts/deploy.mjs"
+  },
+  "devDependencies": {
+    "lucide": "1.8.0",
+    "wrangler": "4.147.0"
+  }
+}

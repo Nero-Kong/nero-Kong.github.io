@@ -1,0 +1,7 @@
+analytics-backend/node_modules/
+analytics-backend/.wrangler/
+analytics-backend/.dev.vars*
+analytics-backend/.production.vars*
+analytics-backend/.admin-access.json
+analytics-backend/test-artifacts/
+analytics-backend/public/icons.js

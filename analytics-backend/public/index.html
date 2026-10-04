@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Private Analytics | Lingrong Kong</title>
+  <link rel="stylesheet" href="/admin.css">
+  <script type="module" src="/admin.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div><span class="site-name">Lingrong Kong</span><span class="divider" aria-hidden="true">/</span><span>Private analytics</span></div>
+    <button id="logout" class="icon-button" title="Sign out" aria-label="Sign out" hidden><span data-icon="LogOut"></span></button>
+  </header>
+  <main>
+    <section id="login-view" class="login-view">
+      <span class="login-icon" data-icon="KeyRound" aria-hidden="true"></span>
+      <h1>Sign in</h1>
+      <form id="login-form">
+        <label for="access-key">Access key</label>
+        <input id="access-key" type="password" autocomplete="off" spellcheck="false" required minlength="32" maxlength="256">
+        <button type="submit" id="login-button" class="primary-button">Sign in</button>
+      </form>
+      <p id="login-error" class="error" role="alert"></p>
+    </section>
+    <section id="dashboard" hidden>
+      <div class="page-heading"><h1>Visits</h1><span class="retention">No automatic expiry</span></div>
+      <form id="filters" class="filters">
+        <label>Date range<select id="date-range">
+          <option value="7">Last 7 days</option><option value="30">Last 30 days</option>
+          <option value="all">All dates</option><option value="custom">Custom</option>
+        </select></label>
+        <label>From<input id="from" name="from" type="date" required></label>
+        <label>To<input id="to" name="to" type="date" required></label>
+        <label>Page<select id="page" name="path">
+          <option value="">All pages</option><option value="/">Home</option>
+          <option value="/project.html">AdaptiveFly</option><option value="/panosomafly.html">PanoSomaFly</option>
+          <option value="/crop-ar.html">Crop AR</option>
+        </select></label>
+        <label>Country<input id="country" name="country" type="text" maxlength="2" placeholder="JP" autocomplete="off"></label>
+        <label class="search-label">IP / network / city<input id="search" name="search" type="search" maxlength="100" autocomplete="off"></label>
+        <button type="submit" class="primary-button filter-button"><span data-icon="Filter" aria-hidden="true"></span>Apply</button>
+      </form>
+      <div class="metrics" aria-label="Visit summary">
+        <div><span>Page views</span><strong id="metric-visits">0</strong></div>
+        <div><span>Unique IPs</span><strong id="metric-ips">0</strong></div>
+        <div><span>Countries</span><strong id="metric-countries">0</strong></div>
+      </div>
+      <div class="breakdowns">
+        <section><h2>Countries</h2><ul id="countries" class="breakdown-list"></ul></section>
+        <section><h2>Pages</h2><ul id="pages" class="breakdown-list"></ul></section>
+      </div>
+      <div class="table-toolbar">
+        <div><h2>Visit log</h2><span id="range-label">Tokyo (UTC+09:00)</span></div>
+        <div class="table-actions">
+          <label class="checkbox-label"><input id="reveal" type="checkbox">Full IPs</label>
+          <button id="refresh" class="icon-button" title="Refresh" aria-label="Refresh"><span data-icon="RefreshCw"></span></button>
+          <button id="export" class="icon-button" title="Export CSV" aria-label="Export CSV"><span data-icon="Download"></span></button>
+          <button id="delete" class="icon-button danger" title="Delete filtered records" aria-label="Delete filtered records"><span data-icon="Trash2"></span></button>
+        </div>
+      </div>
+      <p id="dashboard-error" class="error" role="alert"></p>
+      <div class="table-wrap" tabindex="0" aria-label="Visitor records">
+        <table>
+          <thead><tr><th>Date / time (JST)</th><th>IP address</th><th>Country</th><th>Region / city</th><th>Network / ASN</th><th>Page</th><th>Referrer</th></tr></thead>
+          <tbody id="visits"></tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span id="page-status" aria-live="polite">No records</span>
+        <div>
+          <button id="previous" class="icon-button" title="Previous page" aria-label="Previous page" disabled><span data-icon="ChevronLeft"></span></button>
+          <button id="next" class="icon-button" title="Next page" aria-label="Next page" disabled><span data-icon="ChevronRight"></span></button>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

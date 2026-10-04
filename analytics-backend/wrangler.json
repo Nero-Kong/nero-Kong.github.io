@@ -1,0 +1,52 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lingrong-visitor-analytics",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+    "html_handling": "none"
+  },
+  "vars": {
+    "ALLOWED_ORIGINS": "https://nero-kong.github.io"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "lingrong-visitor-analytics",
+      "database_id": "eaff648f-3a00-44c5-8b84-4d7e1df05fd8",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "ratelimits": [
+    {
+      "name": "COLLECT_LIMITER",
+      "namespace_id": "271001",
+      "simple": {
+        "limit": 120,
+        "period": 60
+      }
+    },
+    {
+      "name": "ADMIN_LIMITER",
+      "namespace_id": "271002",
+      "simple": {
+        "limit": 30,
+        "period": 60
+      }
+    }
+  ],
+  "triggers": {
+    "crons": []
+  },
+  "observability": {
+    "enabled": false
+  }
+}

@@ -405,6 +405,20 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
 }
 .link-list a:hover .arr { color: var(--accent); transform: translateX(3px); }
 
+#downloads { scroll-margin-top: 88px; }
+.download-list a { grid-template-columns: 100px minmax(0, 1fr) 24px; }
+.download-list .value { min-width: 0; overflow-wrap: anywhere; letter-spacing: 0; }
+.download-list .label { color: var(--ink-2); letter-spacing: 0; }
+.download-meta {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ink-2);
+}
+
 /* Bottom nav */
 .project-bottom-nav {
   margin-top: 64px;
@@ -486,6 +500,7 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
     padding: 14px 0;
   }
   .link-list .value { font-size: 14px; }
+  .download-list a { grid-template-columns: 80px minmax(0, 1fr) 20px; }
 
   .footer { flex-direction: column; gap: 8px; align-items: flex-start; }
   .project-bottom-nav { flex-direction: column; align-items: flex-start; gap: 16px; }
@@ -552,6 +567,9 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
       </a>
       <a href="#bibtex" class="btn-ghost">
         BibTeX
+      </a>
+      <a href="#downloads" class="btn-ghost">
+        Download papers
       </a>
     </div>
   </header>
@@ -624,6 +642,26 @@ button { font: inherit; background: none; border: none; color: inherit; cursor: 
     <p>
       Research Center for Advanced Science and Technology (RCAST), The University of Tokyo.
     </p>
+  </section>
+
+  <section class="project-section" id="downloads">
+    <h2>— Downloads</h2>
+    <ul class="link-list download-list">
+      <li>
+        <a href="assets/papers/adaptivefly-ahs-2026.pdf" download="AdaptiveFly-AHs-2026.pdf">
+          <span class="label">AHs 2026</span>
+          <span class="value">AdaptiveFly: Bio-Congruent Adaptation for Embodied 3D Locomotion<span class="download-meta">PDF &middot; 12 pages &middot; 6.8 MB</span></span>
+          <span class="arr" aria-hidden="true">&darr;</span>
+        </a>
+      </li>
+      <li>
+        <a href="assets/papers/adaptivefly-siggraph-asia-2026.pdf" download="AdaptiveFly-SIGGRAPH-Asia-2026.pdf">
+          <span class="label">SIGGRAPH Asia 2026 ET</span>
+          <span class="value">AdaptiveFly: An Adaptive Embodied Control Framework for Navigation and Teleoperation<span class="download-meta">PDF &middot; 3 pages &middot; 3.5 MB</span></span>
+          <span class="arr" aria-hidden="true">&darr;</span>
+        </a>
+      </li>
+    </ul>
   </section>
 
   <section class="project-section">
